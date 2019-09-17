@@ -89,3 +89,12 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+// shutdown using syscall halt
+int
+sys_halt(void){
+  char *p = "Shutting down";
+  for( ; *p; p++)
+    outw(0x604, 0x2000);
+  return 0;
+}
