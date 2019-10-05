@@ -1,94 +1,178 @@
 #include "types.h"
 #include "user.h"
-#include "fcntl.h"
 
-int nums[1000000];
+int global_array[2048] = {0};
+int global_var = 0;
 
-void fill(int n)
-{
-	int i;
-	for(i = 0; i < sizeof(nums) / sizeof(nums[0]); ++i)
-		nums[i] = n;
+void testcase4(){
+    int pid;
+
+    printf(1,"\n----- Test case 4 -----\n");
+    printf(1,"[prnt] v1 --> ");
+    print_free_frame_cnt();
+
+    if((pid = fork()) == 0)
+    {
+        //child
+        sleep(100);
+        printf(1,"[chld] v4 --> ");
+        print_free_frame_cnt();
+        
+        global_array[0] = 222;
+        printf(1,"[chld] modified one element in the 1st page, global_array[0]=%d\n", global_array[0]);
+
+        printf(1,"[chld] v5 --> ");
+        print_free_frame_cnt();
+
+        global_array[2047] = 333;           
+        printf(1,"[chld] modified two elements in the 2nd page, global_array[2047]=%d\n", global_array[2047]);
+
+        printf(1,"[chld] v6 --> ");
+        print_free_frame_cnt();
+        
+        exit();
+    }
+    else 
+    {
+        //parent
+        printf(1,"[prnt] v2 --> ");
+        print_free_frame_cnt();
+        
+        global_array[0] = 111;     
+        printf(1,"[prnt] modified one element in the 1st page, global_array[0]=%d\n", global_array[0]);
+
+        printf(1,"[prnt] v3 --> ");
+        print_free_frame_cnt();
+    }
+
+    if (wait() != pid)
+    {
+        printf(1,"wait() error!");
+        exit();
+    }    
+
+    printf(1, "[prnt] v7 --> ");
+    print_free_frame_cnt();
 }
 
-int check(int n)
-{
-	int i;
-	for(i = 0; i < sizeof(nums) / sizeof(nums[0]); ++i)
-		if(nums[i] != n)
-			return 1;
-	return 0;
+void testcase3(){
+    int pid;
+
+    printf(1,"\n----- Test case 3 -----\n");
+    printf(1,"[prnt] v1 --> ");
+    print_free_frame_cnt();
+
+    if((pid = fork()) == 0)
+    {
+        //child
+        sleep(100);
+        printf(1,"[chld] v4 --> ");
+        print_free_frame_cnt();
+        
+        global_var = 100;
+        printf(1,"[chld] modified global_var, global_var=%d\n", global_var);
+        
+        printf(1,"[chld] v5 --> ");        
+        print_free_frame_cnt();
+        
+        exit();
+    }
+    else 
+    {
+        //parent
+        printf(1,"[prnt] v2 --> ");
+        print_free_frame_cnt();
+        
+        printf(1,"[prnt] read global_var, global_var=%d\n", global_var);
+
+        printf(1,"[prnt] v3 --> ");
+        print_free_frame_cnt();
+    }
+    
+    if (wait() != pid)
+    {
+        printf(1,"wait() error!");
+        exit();
+    }    
+
+    printf(1, "[prnt] v6 -->  ");
+    print_free_frame_cnt();
 }
 
-int main()
-{
-	int i, pid,fd;
-    char content = 'a';
-	printf(0, "Test the speed of fork...\n");
-	for(i = 0; i < 10; ++i)
-	{
-		pid = fork();
-		if(pid == 0)
-		{
-			exit();
-		}
-		else
-		{
-			pid = wait();
-		}
-	}
-	printf(0, "Finish\n");
-	printf(0, "Test the correctness of fork (Copy-On-Write)...\n");
-	fill(1);
-	pid = fork();
-	if(pid == 0)
-	{
-		fill(0);
-		exit();
-	}
-	else
-	{
-		pid = wait();
-		if(check(1))
-			printf(1, "Error in child write\n");
-	}
+void testcase2(){
+    int pid;
+    
+    printf(1,"\n----- Test case 2 -----\n");
+    printf(1,"[prnt] v1 ---> ");
+    print_free_frame_cnt();
 
-	pid = fork();
-	if(pid == 0)
-	{
-		sleep(200);
-		if(check(1))
-			printf(1, "Error in parent write\n");
-		exit();
-	}
-	else
-	{
-		fill(0);
-		pid = wait();
-	}
+    if((pid = fork()) == 0)
+    {
+        //child
+        sleep(100);
+        printf(1,"[chld] v3 ---> ");
+        print_free_frame_cnt();
+        
+        printf(1,"[chld] read global_var, global_var=%d\n", global_var);
+        
+        printf(1,"[chld] v4 ---> ");
+        print_free_frame_cnt();
+        
+        exit();
+    }
+    else 
+    {
+        //parent
+        printf(1,"[prnt] v2 ---> ");
+        print_free_frame_cnt();
+    }
+    
+    if (wait() != pid)
+    {
+        printf(1,"wait() error!");
+        exit();
+    }    
 
-	fd = open("cowtest_temp", O_CREATE|O_WRONLY);
-	write(fd, &content, 1);
-	close(fd);
-	content = 'b';
+    printf(1, "[prnt] v5 --> ");
+    print_free_frame_cnt();
+}
 
-	pid = fork();
-	if(pid == 0)
-	{
-		fd = open("cowtest_temp", O_RDONLY);
-		read(fd, &content, 1);
-		exit();
-	}
-	else
-	{
-		pid = wait();
-		if(content != 'b')
-			printf(1, "Error in child kernel write\n");
-	}
+void testcase1(){
+    int pid;
 
-	unlink("cowtest_temp");
+    printf(1,"\n----- Test case 1 -----\n");
+    printf(1,"[prnt] v1 --> ");
+    print_free_frame_cnt();
+    
+    if((pid = fork()) == 0)
+    {
+        //child
+        sleep(100);        
+        printf(1, "[chld] v2 --> ");
+        print_free_frame_cnt();
+        exit();
+    }
+    else 
+    {
+        //parent
+        printf(1, "[prnt] v3 --> ");
+        print_free_frame_cnt();
+    }
+    
+    if (wait() != pid)
+    {
+        printf(1, "wait() error!");
+        exit();
+    }
+    
+    printf(1, "[prnt] v4 --> ");
+    print_free_frame_cnt();
+}
 
-	printf(0, "Finish\n");
-
-	exit();
+int main(){
+    testcase1();
+    testcase2();
+    testcase3();
+    testcase4();
+    exit();
 }

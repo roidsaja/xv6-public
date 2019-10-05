@@ -7,6 +7,8 @@
 #include "mmu.h"
 #include "proc.h"
 
+extern int free_frame_cnt; // xv6 proj - cow
+
 int
 sys_fork(void)
 {
@@ -97,4 +99,11 @@ sys_halt(void){
   for( ; *p; p++)
     outw(0x604, 0x2000);
   return 0;
+}
+
+
+int sys_print_free_frame_cnt(void)
+{
+    cprintf("free-frames %d\n", free_frame_cnt);
+    return 0;
 }

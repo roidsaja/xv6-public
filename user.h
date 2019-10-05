@@ -38,3 +38,4 @@ void* memset(void*, int, uint);
 void* malloc(uint);
 void free(void*);
 int atoi(const char*);
+void print_free_frame_cnt(void);
