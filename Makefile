@@ -183,6 +183,7 @@ UPROGS=\
 	_zombie\
 	_howto\
 	_sleep\
+	_cowtest\
 	_shutdown\
 
 fs.img: mkfs README $(UPROGS)
